@@ -54,7 +54,7 @@ public:
 	{
 		vec3 reflected = reflect(unit_vector(ray_in.direction()), rec.normal);
 		attenuation = mAlbedo;
-		scattered = ray(rec.p, reflected);
+		scattered = ray(rec.p, reflected, ray_in.time());
 		return (dot(scattered.direction(), rec.normal) > 0);
 	}
 
