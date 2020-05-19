@@ -17,7 +17,8 @@ public:
 		{};
 
 	virtual bool hit(const ray& r, double tMin, double tMax, hitRecord& rec) const override;
-	
+	virtual bool boundingBox(double time0, double time1, aabb& outputBox) const override;
+
 	point3 center(double time) const;
 public:
 	point3 mCenter0, mCenter1;
@@ -67,6 +68,21 @@ bool movingSphere::hit(const ray& r, double tMin, double tMax, hitRecord& rec) c
 	}
 
 	return false;
+}
+
+bool movingSphere::boundingBox(double time0, double time1, aabb& outputBox) const
+{
+	aabb box0(
+		center(time0) - vec3(mRadius), center(time0) + vec3(mRadius)
+	);
+
+	aabb box1(
+		center(time1) - vec3(mRadius), center(time1) + vec3(mRadius)
+	);
+
+	outputBox = surroundingBox(box0, box1);
+
+	return true;
 }
 
 #endif // !MOVINGSPHERE_H

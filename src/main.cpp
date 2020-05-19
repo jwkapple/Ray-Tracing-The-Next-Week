@@ -40,8 +40,8 @@ hittableList randomScene()
 {
 	hittableList world;
 
-	for (int a = -3; a < 3; a++) {
-		for (int b = -3; b < 3; b++) {
+	for (int a = -4; a < 4; a++) {
+		for (int b = -4; b < 4; b++) {
 			auto choose_mat = randomDouble();
 			point3 center(a + 0.9*randomDouble(), 0.2, b + 0.9*randomDouble());
 
