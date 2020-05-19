@@ -32,7 +32,7 @@ public:
 		const ray& r_in, const hitRecord& rec, color& attenuation, ray& scatterd
 	) const override {
 		vec3 scatterDirection = rec.normal + random_unit_vector();
-		scatterd = ray(rec.p, scatterDirection);
+		scatterd = ray(rec.p, scatterDirection, r_in.time());
 		attenuation = mAlbedo;
 		return true;
 	}
@@ -86,19 +86,19 @@ class dielectric : public material {
 			if(etai_over_etat * sin_theta > 1.0)
 			{
 				vec3 reflected = reflect(unitDirection, rec.normal);
-				scattered = ray(rec.p, reflected);
+				scattered = ray(rec.p, reflected,r_in.time());
 				return true;
 			}
 
 			double reflect_prob = schlick(cos_theta, etai_over_etat);
 			if (randomDouble() < reflect_prob) {
 				vec3 reflected = reflect(unitDirection, rec.normal);
-				scattered = ray(rec.p, reflected);
+				scattered = ray(rec.p, reflected, r_in.time());
 				return true;
 			}
 
 			vec3 refracted = refract(unitDirection, rec.normal, etai_over_etat);
-			scattered = ray(rec.p, refracted);
+			scattered = ray(rec.p, refracted, r_in.time());
 			return true;
 		}
 	public:

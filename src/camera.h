@@ -19,24 +19,24 @@ public:
 
 
 		auto theta = degrees_to_radians(vFov);
-		auto half_height = tan(theta / 2);
-		auto half_width = aspectRatio * half_height;
+		auto height = 2* tan(theta / 2);
+		auto width = aspectRatio * height;
 		w = unit_vector(lookFrom - lookAt);
-		u = unit_vector(cross(w, vUp));
+		u = unit_vector(cross(vUp, w));
 		v = cross(w, u);
 
-		mLowerLeftCorner = point3(-half_width, -half_height, -1.0);
-
-		mHorizontal = vec3(2 * half_width, 0.0, 0.0);
-		mVertical = vec3(0.0, 2 * half_height, 0.0);
+		mHorizontal = width * u;
+		mVertical = height * v;
+		mLowerLeftCorner = mOrigin - mHorizontal / 2 - mVertical / 2 - w;
 
 		mTime0 = time0;
 		mTime1 = time1;
 	}
 
-	ray get_ray(double u, double v) const
+	ray get_ray(double s, double t) const
 	{
-		return ray(mOrigin, mLowerLeftCorner + u * mHorizontal + v * mVertical - mOrigin, randomDouble(mTime0, mTime1));
+
+		return ray(mOrigin, mLowerLeftCorner + s * mHorizontal + t * mVertical - mOrigin, randomDouble(mTime0, mTime1));
 	}
 
 private:

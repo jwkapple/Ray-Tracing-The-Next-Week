@@ -40,11 +40,8 @@ hittableList randomScene()
 {
 	hittableList world;
 
-	auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
-
-	for (int a = -4; a < 4; a++) {
-		for (int b = -4; b < 4; b++) {
+	for (int a = -3; a < 3; a++) {
+		for (int b = -3; b < 3; b++) {
 			auto choose_mat = randomDouble();
 			point3 center(a + 0.9*randomDouble(), 0.2, b + 0.9*randomDouble());
 
@@ -56,6 +53,7 @@ hittableList randomScene()
 					auto albedo = color::random() * color::random();
 					sphere_material = make_shared<lambertian>(albedo);
 					auto center2 = center + vec3(0, randomDouble(0, .5), 0);
+					auto ranTime = randomDouble(0,1);
 					world.add(make_shared<movingSphere>(
 						center, center2, 0.0, 1.0, 0.2, sphere_material));
 				}
@@ -73,16 +71,17 @@ hittableList randomScene()
 			}
 		}
 	}
+	
 		world.add(make_shared<sphere>(
 			point3(0, -1000, 0), 1000, make_shared<lambertian>(color(0.5, 0.5, 0.5))));
 	
-		world.add(make_shared<sphere>(point3(0, 1, 0), 1.0, make_shared<dielectric>(1.5)));
+	world.add(make_shared<sphere>(point3(0, 1, 0), 1.0, make_shared<dielectric>(1.5)));
 
-		world.add(
-			make_shared<sphere>(point3(-4, 1, 0), 1.0, make_shared<lambertian>(color(.4, .2, .1))));
+	world.add(
+		make_shared<sphere>(point3(-4, 1, 0), 1.0, make_shared<lambertian>(color(.4, .2, .1))));
 
-		world.add(
-			make_shared<sphere>(point3(4, 1, 0), 1.0, make_shared<metal>(color(.7, .6, .5))));
+	world.add(
+		make_shared<sphere>(point3(4, 1, 0), 1.0, make_shared<metal>(color(.7, .6, .5))));
 
 		return world;
 }
@@ -102,10 +101,8 @@ int main()
 
 	hittableList world = randomScene();
 
-
-
 	auto R = cos(pi / 4);
-	camera cam(point3(-2, 2, 1), point3(0, 0, -1), vUp, vFov, double(imageWidth) / double(imageHeight), time0, time1);
+	camera cam(point3(4, 2, 3), point3(0, 0, -1), vUp, vFov, aspectRatio, time0, time1);
 
 	for (int j = imageHeight-1; j >= 0; --j)
 	{
