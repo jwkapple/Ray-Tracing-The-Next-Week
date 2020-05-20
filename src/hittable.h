@@ -9,11 +9,13 @@ class material;
 
 struct hitRecord
 {
-	double t;
 	point3 p;
 	vec3 normal;
 	shared_ptr<material> matPtr;
 	bool frontFace;
+	double t;
+	double u;
+	double v;
 
 	inline void setFaceNormal(const ray& r, const vec3& outwardNormal)
 	{

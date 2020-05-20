@@ -68,4 +68,13 @@ bool sphere::boundingBox(double time0, double time1, aabb& outputBox) const
 	return true;
 }
 
+void getSphereUV(const vec3& p, double&u, double& v)
+{
+	auto phi = atan2(p.y(), p.x());
+	auto theta = asin(p.z());
+
+	u = 1 - (phi + pi) / (2 * pi);
+	v = (theta + pi/2) / pi;
+}
+
 #endif // !SPHERE_H

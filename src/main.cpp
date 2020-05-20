@@ -1,6 +1,7 @@
 
 #include "rtweekend.h"
 
+#include "bvh.h"
 #include "material.h"
 #include "hittableList.h"
 #include "sphere.h"
@@ -21,6 +22,7 @@ vec3 rayColor(const ray &r, const hittable& world, int depth)
 
 	// Some of the reflected rays hit the object they are reflecting off of not at exactly t = 0 
 	// So we need to ignore hits very near zero
+
 	if (world.hit(r, 0.001, infinity, rec))
 	{
 		color attenuation;
