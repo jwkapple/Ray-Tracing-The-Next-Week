@@ -3,6 +3,7 @@
 #define TEXTURE_H
 
 #include "rtweekend.h"
+#include "perlin.h"
 
 class texture
 {
@@ -46,5 +47,20 @@ public:
 public:
 	shared_ptr<texture> odd;
 	shared_ptr<texture> even;
+};
+
+class noiseTexture : public texture
+{
+public:
+	noiseTexture() = default;
+	noiseTexture(double scale) : mScale(scale) {}
+	virtual color value(double u, double v, const vec3& p) const override
+	{
+		return color(1) * 0.5 * (1.0 + sin(mScale * p.z() + 10 * mNoise.turb(p)));
+	//	return color(1) * mNoise.turb(p);
+	}
+public:
+	perlin mNoise;
+	double mScale;
 };
 #endif // !TEXTURE_H

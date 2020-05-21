@@ -100,6 +100,16 @@ hittableList randomScene()
 		return world;
 }
 
+hittableList twoPerlinSpheres()
+{
+	hittableList objects;
+	double scale = 3.0;
+	auto pertext = make_shared<noiseTexture>(scale);
+	objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+	objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
+
+	return objects;
+}
 int main()
 {
 	const auto aspectRatio = 16.0 / 9.0;
@@ -113,7 +123,7 @@ int main()
 	const double time1 = 1.0;
 	std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
-	hittableList world = randomScene();
+	hittableList world = twoPerlinSpheres();
 
 	auto R = cos(pi / 4);
 	camera cam(point3(4, 2, 3), point3(0, 0, -1), vUp, vFov, aspectRatio, time0, time1);
