@@ -6,7 +6,8 @@
 
 class texture
 {
-	virtual color value(double u, double v, const point3& p) const;
+public:
+	virtual color value(double u, double v, const point3& p) const = 0;
 };
 
 class solidColor : public texture
@@ -23,5 +24,27 @@ public:
 
 private:
 	color mColorValue;
+};
+
+class checkerTexture : public texture
+{
+public:
+	checkerTexture() = default;
+	checkerTexture(shared_ptr<texture> t0, shared_ptr<texture> t1)
+		: odd(t0), even(t1) {}
+
+	virtual color value(double u, double v, const point3& p) const override
+	{
+		auto sines = sin(10 * p.x())*sin(10 * p.y())*sin(10 * p.z());
+		if (sines < 0)
+			return odd->value(u, v, p);
+
+		else
+			return even->value(u, v, p);
+	}
+
+public:
+	shared_ptr<texture> odd;
+	shared_ptr<texture> even;
 };
 #endif // !TEXTURE_H

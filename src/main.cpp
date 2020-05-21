@@ -8,6 +8,7 @@
 #include "movingSphere.h"
 #include "color.h"
 #include "camera.h"
+#include "texture.h"
 #include <iostream>
 
 
@@ -42,8 +43,16 @@ hittableList randomScene()
 {
 	hittableList world;
 
-	for (int a = -4; a < 4; a++) {
-		for (int b = -4; b < 4; b++) {
+	auto checker = make_shared<checkerTexture>
+		(
+			make_shared<solidColor>(0.2, 0.3, 0.1),
+			make_shared<solidColor>(0.9)
+		);
+
+	world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
+
+	for (int a = -3; a < 3; a++) {
+		for (int b = -3; b < 3; b++) {
 			auto choose_mat = randomDouble();
 			point3 center(a + 0.9*randomDouble(), 0.2, b + 0.9*randomDouble());
 
@@ -53,7 +62,8 @@ hittableList randomScene()
 				if (choose_mat < 0.8) {
 					// diffuse
 					auto albedo = color::random() * color::random();
-					sphere_material = make_shared<lambertian>(albedo);
+					auto texture = make_shared<solidColor>(albedo);
+					sphere_material = make_shared<lambertian>(texture);
 					auto center2 = center + vec3(0, randomDouble(0, .5), 0);
 					auto ranTime = randomDouble(0,1);
 					world.add(make_shared<movingSphere>(
@@ -74,13 +84,15 @@ hittableList randomScene()
 		}
 	}
 	
+	auto tmpTexture = make_shared<solidColor>(0.5, 0.5, 0.);
 		world.add(make_shared<sphere>(
-			point3(0, -1000, 0), 1000, make_shared<lambertian>(color(0.5, 0.5, 0.5))));
+			point3(0, -1000, 0), 1000, make_shared<lambertian>(tmpTexture)));
 	
 	world.add(make_shared<sphere>(point3(0, 1, 0), 1.0, make_shared<dielectric>(1.5)));
 
+	tmpTexture = make_shared<solidColor>(.4, .2, .1);
 	world.add(
-		make_shared<sphere>(point3(-4, 1, 0), 1.0, make_shared<lambertian>(color(.4, .2, .1))));
+		make_shared<sphere>(point3(-4, 1, 0), 1.0, make_shared<lambertian>(tmpTexture)));
 
 	world.add(
 		make_shared<sphere>(point3(4, 1, 0), 1.0, make_shared<metal>(color(.7, .6, .5))));

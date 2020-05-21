@@ -25,7 +25,7 @@ double schlick(double cosine, double ref_idx) {
 class lambertian : public material
 {
 public:
-	lambertian(const color& a) : mAlbedo(a) { }
+	lambertian(shared_ptr<texture> a) : mAlbedo(a) { }
 
 	virtual bool scatter
 	(
@@ -33,12 +33,12 @@ public:
 	) const override {
 		vec3 scatterDirection = rec.normal + random_unit_vector();
 		scatterd = ray(rec.p, scatterDirection, r_in.time());
-		attenuation = mAlbedo;
+		attenuation = mAlbedo->value(rec.u, rec.v, rec.p);
 		return true;
 	}
 	
 private:
-	color mAlbedo;
+	shared_ptr<texture> mAlbedo;
 };
 
 class metal : public material
