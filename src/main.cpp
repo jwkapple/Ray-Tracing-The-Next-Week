@@ -9,6 +9,7 @@
 #include "color.h"
 #include "camera.h"
 #include "texture.h"
+
 #include <iostream>
 
 
@@ -29,7 +30,8 @@ vec3 rayColor(const ray &r, const hittable& world, int depth)
 		color attenuation;
 		ray scattered;
 		if (rec.matPtr->scatter(r, rec, attenuation, scattered))
-			return attenuation * rayColor(scattered, world, depth - 1);
+			//return attenuation * rayColor(scattered, world, depth - 1);
+			return attenuation;
 		return color(0);
 	}
 
@@ -110,6 +112,23 @@ hittableList twoPerlinSpheres()
 
 	return objects;
 }
+
+hittableList earth()
+{
+	auto earthTexture = make_shared<imageTexture>("samples/earthmap.jpg");
+	auto earthSurface = make_shared<lambertian>(earthTexture);
+	auto earthGlobe = make_shared<sphere>(point3(0,2,0), 2, earthSurface);
+
+	hittableList objects;
+	
+	objects.add(earthGlobe);
+	
+	double scale = 3.0;
+	auto pertext = make_shared<noiseTexture>(scale);
+	objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
+	return objects;
+	
+}
 int main()
 {
 	const auto aspectRatio = 16.0 / 9.0;
@@ -123,7 +142,7 @@ int main()
 	const double time1 = 1.0;
 	std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
-	hittableList world = twoPerlinSpheres();
+	hittableList world = earth();
 
 	auto R = cos(pi / 4);
 	camera cam(point3(4, 2, 3), point3(0, 0, -1), vUp, vFov, aspectRatio, time0, time1);

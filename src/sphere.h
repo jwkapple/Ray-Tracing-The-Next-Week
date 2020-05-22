@@ -6,6 +6,8 @@
 #include "hittable.h"
 #include "vec3.h"
 
+void getSphereUV(const vec3& p, double&u, double& v);
+
 class sphere : public hittable
 {
 public:
@@ -41,6 +43,7 @@ bool sphere::hit(const ray& r, double tMin, double tMax, hitRecord& rec) const
 			rec.matPtr = mMatPtr;
 			vec3 outwardNormal = (rec.p - mCenter) / mRadius;
 			rec.setFaceNormal(r, outwardNormal);
+			getSphereUV((rec.p - mCenter) / mRadius, rec.u, rec.v);
 			return true;
 		} // Send hit record to Ray with hitRecord
 
@@ -52,6 +55,7 @@ bool sphere::hit(const ray& r, double tMin, double tMax, hitRecord& rec) const
 			rec.matPtr = mMatPtr;
 			vec3 outwardNormal = (rec.p - mCenter) / mRadius;
 			rec.setFaceNormal(r, outwardNormal);
+			getSphereUV((rec.p-mCenter) / mRadius, rec.u, rec.v);
 			return true;
 		}
 	}

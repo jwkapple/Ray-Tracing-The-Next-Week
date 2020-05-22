@@ -1,9 +1,11 @@
 #pragma once
 #ifndef TEXTURE_H
 #define TEXTURE_H
+#define STB_IMAGE_IMPLEMENTATION
 
 #include "rtweekend.h"
 #include "perlin.h"
+#include "stb_image.h"
 
 class texture
 {
@@ -62,5 +64,61 @@ public:
 public:
 	perlin mNoise;
 	double mScale;
+};
+
+class imageTexture : public texture
+{
+public:
+	const static int mBytesPerPixel = 3;
+
+	imageTexture()
+		:mData(nullptr), mWidth(0), mHeight(0), mBytesPerScanline(0) {}
+
+	imageTexture(const char* filename)
+	{
+		auto componentsPerPixel = mBytesPerPixel;
+
+		mData = stbi_load(filename, &mWidth, &mHeight, &componentsPerPixel, componentsPerPixel);
+
+		if (!mData)
+		{
+			std::cerr << "ERROR: Could not load texture image file '" << filename << "'. \n";
+			mWidth = mHeight = 0;
+		}
+
+		mBytesPerScanline = mBytesPerPixel * mWidth;
+	}
+
+	~imageTexture()
+	{
+		delete mData;
+	}
+
+	virtual color value(double u, double v, const vec3& p) const override
+	{
+		// If we have no texture data, then return solid cyan as a debugging aid.
+		if (mData == nullptr)
+			return color(0, 1, 1);
+
+		// Clamp input texture coordinates to [0,1] x [1,0]
+		u = clamp(u, 0.0, 1.0);
+		v = 1.0 - clamp(v, 0.0, 1.0); // Flip V to image coordinates
+
+		auto i = static_cast<int>(u * mWidth); // vec3 for width
+		auto j = static_cast<int>(v * mHeight); // vec3 fro height
+
+		// Clamp integer mapping, since actual coordinates should be less than 1.0
+		if (i >= mWidth) i = mWidth - 1;
+		if (j >= mHeight) j = mHeight - 1;
+
+		const auto colorScale = 1.0 / 255.0;
+		auto pixel = mData + j * mBytesPerScanline + i * mBytesPerPixel;
+
+		return color(colorScale * pixel[0], colorScale * pixel[1], colorScale * pixel[2]);
+	}
+private:
+	unsigned char* mData;
+	int mWidth, mHeight;
+	int mBytesPerScanline;
 };
 #endif // !TEXTURE_H
