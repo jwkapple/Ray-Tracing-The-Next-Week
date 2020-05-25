@@ -5,6 +5,7 @@
 
 #include "ray.h"
 #include "aabb.h"
+
 class material;
 
 struct hitRecord
@@ -12,7 +13,7 @@ struct hitRecord
 	point3 p;
 	vec3 normal;
 	shared_ptr<material> matPtr;
-	bool frontFace;
+	bool frontFace{false};
 	double t;
 	double u;
 	double v;

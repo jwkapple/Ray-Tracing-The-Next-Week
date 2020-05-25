@@ -4,9 +4,15 @@
 #include "bvh.h"
 #include "material.h"
 #include "hittableList.h"
+
 #include "sphere.h"
 #include "movingSphere.h"
 #include "aarect.h"
+#include "box.h"
+
+#include "translate.h"
+#include "rotateY.h"
+
 #include "color.h"
 #include "camera.h"
 #include "texture.h"
@@ -146,6 +152,16 @@ hittableList cornellBox()
 	objects.add(make_shared<xzRect>(0, 555, 0, 555, 555, white));
 	objects.add(make_shared<xyRect>(0, 555, 0, 555, 555, white));
 
+	shared_ptr<hittable> box1 = make_shared<box>(point3(0, 0, 0), point3(165, 330, 165), white);
+	box1 = make_shared<rotateY>(box1, 15);
+	box1 = make_shared<translate>(box1, vec3(265, 0, 295));
+	objects.add(box1);
+
+	shared_ptr<hittable> box2 = make_shared<box>(point3(0), point3(165), white);
+	box2 = make_shared<rotateY>(box2, -18);
+	box2 = make_shared<translate>(box2, vec3(130, 0, 65));
+	objects.add(box2);
+
 	return objects;
 }
 int main()
@@ -154,7 +170,7 @@ int main()
 	const int imageWidth = 384;
 	const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
 	const int samples_per_pixel = 100;
-	const int maxDepth = 10;
+	const int maxDepth = 50;
 	point3 lookFrom = point3(278, 278, -800);
 	point3 lookAt = point3(278, 278, 0);
 	const vec3 vUp = vec3(0, 1, 0);
