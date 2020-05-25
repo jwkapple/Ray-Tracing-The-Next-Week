@@ -6,6 +6,7 @@
 #include "hittableList.h"
 #include "sphere.h"
 #include "movingSphere.h"
+#include "aarect.h"
 #include "color.h"
 #include "camera.h"
 #include "texture.h"
@@ -14,7 +15,7 @@
 
 
 
-vec3 rayColor(const ray &r, const hittable& world, int depth)
+vec3 rayColor(const ray &r,const color& background, const hittable& world, int depth)
 {
 	hitRecord rec;
 	
@@ -22,23 +23,19 @@ vec3 rayColor(const ray &r, const hittable& world, int depth)
 	if (depth <= 0)
 		return color(0, 0, 0);
 
-	// Some of the reflected rays hit the object they are reflecting off of not at exactly t = 0 
-	// So we need to ignore hits very near zero
+	// if ray does'nt hit anything, return black background
+	if (!world.hit(r, 0.001, infinity, rec))
+		return background;
+	
+	color attenuation;
+	ray scattered;
+	color emitted = rec.matPtr->emitted(rec.u, rec.v, rec.p);
 
-	if (world.hit(r, 0.001, infinity, rec))
-	{
-		color attenuation;
-		ray scattered;
-		if (rec.matPtr->scatter(r, rec, attenuation, scattered))
-			//return attenuation * rayColor(scattered, world, depth - 1);
-			return attenuation;
-		return color(0);
-	}
+	// If object doesn't scatters ray(which means it emit), return emitted color
+	if (!rec.matPtr->scatter(r, rec, attenuation, scattered))
+		return emitted;
 
-
-	vec3 unitDirection = unit_vector(r.direction());
-	auto t = 0.5 * (unitDirection.y() + 1.0);
-	return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
+	return emitted + attenuation * rayColor(scattered, background, world, depth - 1);
 }
 
 hittableList randomScene()
@@ -108,26 +105,48 @@ hittableList twoPerlinSpheres()
 	double scale = 3.0;
 	auto pertext = make_shared<noiseTexture>(scale);
 	objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
-	objects.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
+	objects.add(make_shared<sphere>(point3(0, 2, 0), -2, make_shared<lambertian>(pertext)));
 
 	return objects;
 }
 
 hittableList earth()
 {
+	hittableList objects;
+
 	auto earthTexture = make_shared<imageTexture>("samples/earthmap.jpg");
 	auto earthSurface = make_shared<lambertian>(earthTexture);
 	auto earthGlobe = make_shared<sphere>(point3(0,2,0), 2, earthSurface);
-
-	hittableList objects;
-	
 	objects.add(earthGlobe);
+
+	auto diffLight = make_shared<diffuseLight>(make_shared<solidColor>(4, 4, 4));
+	objects.add(make_shared<sphere>(point3(0, 7, 0), 2, diffLight));
+	objects.add(make_shared<xyRect>(3, 5, 1, 3, -2, diffLight));
 	
 	double scale = 3.0;
 	auto pertext = make_shared<noiseTexture>(scale);
 	objects.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
-	return objects;
 	
+	return objects;
+}
+
+hittableList cornellBox()
+{
+	hittableList objects;
+
+	auto red = make_shared<lambertian>(make_shared<solidColor>(.65, .05, .05));
+	auto white = make_shared<lambertian>(make_shared<solidColor>(.73, .73, .73));
+	auto green = make_shared<lambertian>(make_shared<solidColor>(.12, .45, .15));
+	auto light = make_shared<diffuseLight>(make_shared<solidColor>(15, 15, 15));
+
+	objects.add(make_shared<yzRect>(0, 555, 0, 555, 555, green));
+	objects.add(make_shared<yzRect>(0, 555, 0, 555, 0, red));
+	objects.add(make_shared<xzRect>(213, 343, 227, 332, 554, light));
+	objects.add(make_shared<xzRect>(0, 555, 0, 555, 0, white));
+	objects.add(make_shared<xzRect>(0, 555, 0, 555, 555, white));
+	objects.add(make_shared<xyRect>(0, 555, 0, 555, 555, white));
+
+	return objects;
 }
 int main()
 {
@@ -136,16 +155,20 @@ int main()
 	const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
 	const int samples_per_pixel = 100;
 	const int maxDepth = 10;
+	point3 lookFrom = point3(278, 278, -800);
+	point3 lookAt = point3(278, 278, 0);
 	const vec3 vUp = vec3(0, 1, 0);
-	const double vFov = 90;
+	const double vFov = 40;
 	const double time0 = 0.0;
 	const double time1 = 1.0;
+	const color background = color(0);
+
 	std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
-	hittableList world = earth();
+	hittableList world = cornellBox();
 
 	auto R = cos(pi / 4);
-	camera cam(point3(4, 2, 3), point3(0, 0, -1), vUp, vFov, aspectRatio, time0, time1);
+	camera cam(lookFrom, lookAt, vUp, vFov, aspectRatio, time0, time1);
 
 	for (int j = imageHeight-1; j >= 0; --j)
 	{
@@ -159,7 +182,7 @@ int main()
 				auto v = (double(j) + randomDouble())/ (imageHeight - 1);
 				ray r = cam.get_ray(u, v);
 				
-				pixelColors += rayColor(r, world, maxDepth);
+				pixelColors += rayColor(r, background, world, maxDepth);
 			}
 			write_color(std::cout, pixelColors, samples_per_pixel );
 		}

@@ -10,6 +10,10 @@
 class material
 {
 public:
+	virtual color emitted(double u, double v, const point3& p) const
+	{
+		return color(0);
+	}
 	virtual bool scatter
 	(
 		const ray& r_in, const hitRecord& rec, color& attenuation, ray& scatterd
@@ -103,6 +107,26 @@ class dielectric : public material {
 		}
 	public:
 	double ref_idx;
+};
+
+class diffuseLight : public material
+{
+public:
+	diffuseLight() = default;
+	diffuseLight(shared_ptr<texture> a) : mEmit(a) {}
+
+	virtual bool scatter(
+		const ray& r, const hitRecord& rec, color& attenuation, ray& scattered) const override
+	{
+		return false;
+	}
+	virtual color emitted(double u, double v, const point3& p) const override
+	{
+		return mEmit->value(u, v, p);
+	}
+
+public:
+	shared_ptr<texture> mEmit;
 };
 #endif // !MATERIAL_H
 
