@@ -167,7 +167,7 @@ hittableList cornellBox()
 int main()
 {
 	const auto aspectRatio = 16.0 / 9.0;
-	const int imageWidth = 384;
+	const int imageWidth = 800;
 	const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
 	const int samples_per_pixel = 100;
 	const int maxDepth = 50;
