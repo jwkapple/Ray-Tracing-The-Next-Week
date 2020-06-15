@@ -164,6 +164,74 @@ hittableList cornellBox()
 
 	return objects;
 }
+
+hittableList final_scene() {
+	hittableList boxes1;
+	auto ground = make_shared<lambertian>(make_shared<solidColor>(0.48, 0.83, 0.53));
+
+	const int boxes_per_side = 20;
+	for (int i = 0; i < boxes_per_side; i++) {
+		for (int j = 0; j < boxes_per_side; j++) {
+			auto w = 100.0;
+			auto x0 = -1000.0 + i * w;
+			auto z0 = -1000.0 + j * w;
+			auto y0 = 0.0;
+			auto x1 = x0 + w;
+			auto y1 = randomDouble(1, 101);
+			auto z1 = z0 + w;
+
+			boxes1.add(make_shared<box>(point3(x0, y0, z0), point3(x1, y1, z1), ground));
+		}
+	}
+
+	hittableList objects;
+
+	objects.add(make_shared<bvhNode>(boxes1, 0, 1));
+
+	auto light = make_shared<diffuseLight>(make_shared<solidColor>(7, 7, 7));
+	objects.add(make_shared<xzRect>(123, 423, 147, 412, 554, light));
+
+	auto center1 = point3(400, 400, 200);
+	auto center2 = center1 + vec3(30, 0, 0);
+	auto moving_sphere_material =
+		make_shared<lambertian>(make_shared<solidColor>(0.7, 0.3, 0.1));
+	objects.add(make_shared<movingSphere>(center1, center2, 0, 1, 50, moving_sphere_material));
+
+	objects.add(make_shared<sphere>(point3(260, 150, 45), 50, make_shared<dielectric>(1.5)));
+	objects.add(make_shared<sphere>(
+		point3(0, 150, 145), 50, make_shared<metal>(color(0.8, 0.8, 0.9), 10.0)
+		));
+
+	auto boundary = make_shared<sphere>(point3(360, 150, 145), 70, make_shared<dielectric>(1.5));
+	objects.add(boundary);
+	objects.add(make_shared<constantMedium>(
+		boundary, 0.2, make_shared<solidColor>(0.2, 0.4, 0.9)
+		));
+	boundary = make_shared<sphere>(point3(0, 0, 0), 5000, make_shared<dielectric>(1.5));
+	objects.add(make_shared<constantMedium>(
+		boundary, .0001, make_shared<solidColor>(1, 1, 1)));
+
+	auto emat = make_shared<lambertian>(make_shared<imageTexture>("earthmap.jpg"));
+	objects.add(make_shared<sphere>(point3(400, 200, 400), 100, emat));
+	auto pertext = make_shared<noiseTexture>(0.1);
+	objects.add(make_shared<sphere>(point3(220, 280, 300), 80, make_shared<lambertian>(pertext)));
+
+	hittableList boxes2;
+	auto white = make_shared<lambertian>(make_shared<solidColor>(.73, .73, .73));
+	int ns = 1000;
+	for (int j = 0; j < ns; j++) {
+		boxes2.add(make_shared<sphere>(point3::random(0, 165), 10, white));
+	}
+
+	objects.add(make_shared<translate>(
+		make_shared<rotateY>(
+			make_shared<bvhNode>(boxes2, 0.0, 1.0), 15),
+		vec3(-100, 270, 395)
+		)
+	);
+
+	return objects;
+}
 int main()
 {
 	const auto aspectRatio = 16.0 / 9.0;
